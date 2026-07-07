@@ -1,0 +1,24 @@
+services:
+  doc-tools:
+    build: .
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT:-8080}
+    volumes:
+      - doc-tools-tmp:/tmp/doc-tools
+      # Dev convenience: serve the working-tree frontend so JS/CSS/HTML changes
+      # appear on browser refresh without rebuilding the image. Backend changes
+      # still require a rebuild (docker compose up --build).
+      - ./frontend:/app/frontend:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT:-8080}/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  doc-tools-tmp:
